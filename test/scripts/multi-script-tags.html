@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Testing synchronous load of multiple Javascript files using scripts tags</title>
+<link rel="shortcut icon" href="data:image/x-icon;base64," type="image/x-icon">
+<link rel="stylesheet" href="data:text/css;,html > iframe { display: block; float: right; height: 4px; width: 50px; background-color: red; }" type="text/css">
+<script src="../../src/loader.js"></script>
+<script>
+function myFunc(data) {
+  myFunc = function() { return data; }
+}
+function getData(data) {
+  getData = function() { return data; }
+}
+</script>
+<script src="../libs/nwmatcher.js"></script>
+<script src="../libs/jquery-1.9.1-mod.js"></script>
+<script src="../libs/jquery-ui-1.10.1.js"></script>
+<script src="../libs/jquery-test.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/dojo/1/dojo/dojo.xd.js"></script>
+<!--
+<script src="//ajax.googleapis.com/ajax/services/search/web?v=1.0&q=Dog&callback=myFunc"></script>
+-->
+<script src="//picasaweb.google.com/data/feed/api/user/carlosneyra55?kind=photo&alt=json&callback=getData"></script>
+<!--
+<script src="//1.cuzillion.com/bin/resource.cgi?type=js&sleep=2&jsdelay=0&n=1"></script>
+-->
+</head>
+<body>
+
+<div id="output">TEST</div>
+
+<!--
+<img src="http://r-ec.bstatic.com/images/city/600x200/286/28656.jpg" alt"Rome">
+-->
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Testing asynchronous load of multiple Javascript files using iframes</title>
+<link rel="shortcut icon" href="data:image/x-icon;base64," type="image/x-icon">
+<link rel="stylesheet" href="data:text/css;,html > iframe { display: block; float: right; height: 4px; width: 50px; background-color: red; }" type="text/css">
+<script src="../../src/loader.js"></script>
+<script>
+(function() {
+
+  var modules = navigator.modules, load = modules.Loader.load,
+
+  ga = '//ajax.googleapis.com/ajax/';
+
+  load([{
+    loadmode: 1,
+    resource: '../libs/nwmatcher.js',
+    success: function(host) { modules.NW = host.NW; }
+  },{
+    loadmode: 1,
+    resource: ga + 'libs/dojo/1/dojo/dojo.xd.js',
+    success: function(host) { modules.dojo = host.dojo; }
+  },{
+    loadmode: 2,
+    resource: ['../libs/jquery-1.9.1-mod.js', '../libs/jquery-ui-1.10.1.js', '../libs/jquery-test.js' ],
+    success: function(host) { modules.jQuery = host.jQuery; }
+  }], function() { console.info('*--- GROUP 1 completed ---*'); });
+
+  load([/*{
+    loadmode: 3,
+    resource: ga + 'services/search/web?v=1.0&q=Dog&callback=myFunc',
+    success: function(host, data) { modules.myFunc = host.myFunc; }
+  },*/{
+    loadmode: 3,
+    resource: '//picasaweb.google.com/data/feed/api/user/' +
+              'carlosneyra55?kind=photo&alt=json&callback=getData',
+    success: function(host, data) { modules.getData = host.getData; }
+  }/*,{
+    loadmode: 3,
+    resource: '//1.cuzillion.com/bin/resource.cgi?type=js&sleep=2&jsdelay=0&n=1',
+    success: function(host, data) { console.info('Cuzillion Delayed script'); }
+  }*/], function() { console.info('*--- GROUP 2 completed ---*'); });
+
+})();
+</script>
+</head>
+<body>
+
+<div id="output">TEST</div>
+
+<!--
+<img src="http://r-ec.bstatic.com/images/city/600x200/286/28656.jpg" alt"Rome">
+-->
+
+</body>
+</html>
