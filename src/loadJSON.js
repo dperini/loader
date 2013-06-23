@@ -28,9 +28,8 @@ function loadJSON(url, callback) {
       event.initEvent('onpage', true, true);
       frameElement.dispatchEvent(event);
     } :
-    function(event) {
-      event = document.createEventObject();
-      frameElement.fireEvent('onpage', event);
+    function() {
+      frameElement.fireEvent('onpage', document.createEventObject());
     };
 
   // initialize JSONP wrapper
