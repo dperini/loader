@@ -15,8 +15,9 @@ function loadJSON(url, callback) {
 
   html, iframe, jsonp, trigger,
 
-  // to extract callback name from URL
-  JSONP = /(?:callback|jsonp)=([^\x26]*)/;
+  // used to extract the callback function name from URL
+  // should cover the majority of popular REST/JSON API
+  JSONP = /(?:callback|jsoncallback|jsonp)=([^\x26]*)/;
 
   /* ========== VAR BLOCK END ========== */
 
