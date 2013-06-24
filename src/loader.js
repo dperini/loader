@@ -201,9 +201,7 @@
     iframe.src = 'javascript:\'' + html + '\'';
 
     // insert iframe in the document, before the head section
-    setTimeout(function() {
-      iframe = r.insertBefore(iframe, d.head || r.firstChild);
-    });
+    iframe = r.insertBefore(iframe, d.head || r.firstChild);
 
     // iframe callback & cleanup
     function iframe_handler(e) {
@@ -301,10 +299,8 @@
     // and pre-DOMContentLoaded requests
     if (!done && w.addEventListener) {
       done = true;
-      w.addEventListener('fl', init, true);
-      e = d.createEvent('Event');
-      e.initEvent('fl', true, true);
-      w.dispatchEvent(e);
+      // start queueing after DOMContentLoaded
+      w.addEventListener('DOMContentLoaded', init, true);
     }
 
     // start loading resources for older browsers
