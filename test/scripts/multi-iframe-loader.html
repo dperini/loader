@@ -17,30 +17,30 @@
   load([{
     loadmode: 1,
     resource: '../libs/nwmatcher.js',
-    success: function(host) { modules.NW = host.NW; }
+    success: function(name, host) { modules.NW = host.NW; }
   },{
     loadmode: 1,
     resource: ga + 'libs/dojo/1/dojo/dojo.xd.js',
-    success: function(host) { modules.dojo = host.dojo; }
+    success: function(name, host) { modules.dojo = host.dojo; }
   },{
     loadmode: 2,
     resource: ['../libs/jquery-1.9.1-mod.js', '../libs/jquery-ui-1.10.1.js', '../libs/jquery-test.js' ],
-    success: function(host) { modules.jQuery = host.jQuery; }
+    success: function(name, host) { modules.jQuery = host.jQuery; }
   }], function() { console.info('*--- GROUP 1 completed ---*'); });
 
   load([/*{
     loadmode: 3,
     resource: ga + 'services/search/web?v=1.0&q=Dog&callback=myFunc',
-    success: function(host, data) { modules.myFunc = host.myFunc; }
+    success: function(name, host) { modules.myFunc = host.myFunc; }
   },*/{
     loadmode: 3,
     resource: '//picasaweb.google.com/data/feed/api/user/' +
               'carlosneyra55?kind=photo&alt=json&callback=getData',
-    success: function(host, data) { modules.getData = host.getData; }
+    success: function(name, host) { modules.getData = host.getData; }
   }/*,{
     loadmode: 3,
     resource: '//1.cuzillion.com/bin/resource.cgi?type=js&sleep=2&jsdelay=0&n=1',
-    success: function(host, data) { console.info('Cuzillion Delayed script'); }
+    success: function(name, host) { console.info('Cuzillion Delayed script'); }
   }*/], function() { console.info('*--- GROUP 2 completed ---*'); });
 
 })();

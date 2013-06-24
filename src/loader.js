@@ -24,6 +24,9 @@
   // processing flags & queue
   done, loaded, sources = [ ],
 
+  // an empty function shortcut
+  FN = function(x) { return x; },
+
   // iframe and script to clone
   _iframe = d.createElement('iframe'),
   _script = d.createElement('script'),
@@ -206,7 +209,7 @@
 
       if (typeof success == 'function') {
         // JSONP callback already processed
-        remove = success.call(iframe, iframe.contentWindow, loadname);
+        remove = success.call(iframe, loadname, iframe.contentWindow);
       }
 
       if (!remove && iframe.parentNode) {
@@ -223,7 +226,7 @@
           if (group_count[id] === 0) {
             if (typeof group_ready[id] == 'function') {
               w.setTimeout(function() {
-                group_ready[id].call(iframe, loadname);
+                group_ready[id].call(iframe, loadname, iframe.contentWindow);
               });
             }
           }
@@ -245,28 +248,34 @@
 
     success && (success.group_id = group_id);
 
+    if (typeof resources == 'string') {
+      resources = [ resources ];
+    }
+
     // queue resources
-    if (typeof resources == 'string' || typeof resources[0] == 'string') {
+    if (typeof resources[0] == 'string') {
+      // array of strings
+      name = resources[0];
+      jsonp = name.match(JSONP);
       sources.push({ 
-        loadmode: loadmode || 2,
-        loadname: loadname,
+        loadmode: 0,
+        loadname: loadname || (jsonp && jsonp[1]) || name_from_url(name),
         resource: resources,
-        success: success,
-        failure: failure || function() {}
+        success: success || FN,
+        failure: failure || FN
       });
     } else {
       for (i = 0, l = 0; s = resources[i]; ++i) {
+        // array of objects
         name = typeof s.resource == 'string' ?
-          s.resource :
-          s.resource[i];
+          s.resource : s.resource[i];
         jsonp = name.match(JSONP);
-        name = name.match(/[^\/]\/(.*)\.js$/);
         sources.push({
-          loadmode: s.loadmode || 2,
-          loadname: s.loadname || (name && name[1]) || (jsonp && jsonp[1]) || 'default',
+          loadmode: s.loadmode || 0,
+          loadname: s.loadname || (jsonp && jsonp[1]) || name_from_url(name),
           resource: s.resource,
-          success: s.success,
-          failure: failure || function() {}
+          success: s.success || FN,
+          failure: s.failure || FN
         });
         s.success.group_id = group_id;
         if (s.loadmode != 4) ++l;
@@ -299,6 +308,12 @@
       sequence();
     }
 
+  }
+
+  // extract name from url
+  function name_from_url(url) {
+    var name = url.match(/[^\/]+$/);
+    return name[0].split(/\_|\.|\-/)[0];
   }
 
   function Loader(options) {
