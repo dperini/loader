@@ -16,7 +16,7 @@
     load([{
       loadmode: 2,
       resource: ['../libs/jquery-1.9.1-mod.js', '../libs/jquery-ui-1.10.1.js', '../libs/jquery-test.js' ],
-      success: function(host) { modules.jQuery = host.jQuery; }
+      success: function(name, host) { modules.jQuery = host.jQuery; }
     }],
     function(host) {
       console.info('*--- jQuery + UI load completed ---*');

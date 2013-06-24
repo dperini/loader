@@ -18,7 +18,7 @@
       resource:
         '//picasaweb.google.com/data/feed/api/user/' +
         'carlosneyra55?kind=photo&alt=json&callback=getData&rst=' + (+new Date),
-      success: function(host) { modules.getData = host.getData; },
+      success: function(name, host) { modules.getData = host.getData; },
     }],
     function() {
       console.log(modules.getData());
