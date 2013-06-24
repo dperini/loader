@@ -37,7 +37,12 @@
 
   // used to extract the callback function name from URL
   // should cover the majority of popular REST/JSON API
-  JSONP = /(?:callback|jsoncallback|jsonp)=([^\x26]*)/;
+  JSONP = /(?:callback|jsoncallback|jsonp)=([^\x26]*)/,
+
+  WRAPPER =
+    '<script>' +
+      '(function(){var w=window,d=w.document;})()' +
+    '</script>';
 
   // set default config options
   config.scope || (config.scope = 'modules');
@@ -74,13 +79,17 @@
   // load
   function load_resource(descriptor) {
 
-    var i, count, jsonp, length, html = '', iframe, script,
+    var i, count, jsonp, html,
+
+    length, iframe, script, wrap,
+
+    success = descriptor.success,
+    failure = descriptor.failure,
 
     loadmode = descriptor.loadmode,
     loadname = descriptor.loadname,
+
     resource = descriptor.resource,
-    success = descriptor.success,
-    failure = descriptor.failure,
 
     // BEGIN: iframe injectable functions
 
@@ -89,19 +98,18 @@
 
     dispatch = d.createEvent ? function dispatch(e) {
       (e = d.createEvent('Event')).initEvent('onpage', true, true);
-      frameElement.dispatchEvent(e);
+      w.frameElement.dispatchEvent(e);
     } : function dispatch() {
-      frameElement.fireEvent('onpage', d.createEventObject());
+      w.frameElement.fireEvent('onpage', d.createEventObject());
     },
 
     setup = function setup(scripts) {
-      var w = window, d = document,
-      h = d.head || d.documentElement,
+      var h = d.head || d.documentElement,
       i, l = scripts.length || 1, s,
       t = d.createEvent ? 'onload' : 'onreadystatechange';
       function notify(e) {
         if (this.readyState && !(/complete|loaded/.test(this.readyState))) return;
-        if (l) { l--; l === 0 && dispatch(); }
+        l && l-- && l === 0 && dispatch();
       }
       if (isNaN(scripts)) {
         w.onload = function() {
@@ -159,18 +167,19 @@
     iframe = _iframe.cloneNode(true);
 
     // build html to be injected
+    html = '';
     if (loadmode == 1 || loadmode == 3) {
       /* mode 1 & mode 3 */
       for (i = 0; length > i; ++i) {
         html += '"' + resource[i] + '"' + (i == length - 1 ? '' : ',');
       }
-      html = '<script>(function(){var w=window,d=w.document;' + dispatch + '(' + setup + ')([' + html + ']);})();</script>';
+      html = WRAPPER.replace(';', ';' + dispatch + '(' + setup + ')([' + html + '])');
     } else {
       /* mode 2 & mode 4 */
       for (i = 0; length > i; ++i) {
         html += '<script src="' + resource[i] + '"></script>';
       }
-      html += '<script>(function(){var w=window,d=w.document;(' + dispatch + ')();})();</script>';
+      html += WRAPPER.replace(';', ';(' + dispatch + ')()');
     }
 
     if (loadmode == 3) {
@@ -205,14 +214,17 @@
 
     // iframe callback & cleanup
     function iframe_handler(e) {
-      var id, remove;
+
+      var id, remove,
+      name = loadname,
+      host = iframe.contentWindow;
 
       // keep a reference to the iframe
       _cache.push(iframe);
 
       if (typeof success == 'function') {
         // JSONP callback already processed
-        remove = success.call(iframe, loadname, iframe.contentWindow);
+        remove = success.call(iframe, name, host);
       }
 
       if (!remove && iframe.parentNode) {
@@ -229,7 +241,7 @@
           if (group_count[id] === 0) {
             if (typeof group_ready[id] == 'function') {
               w.setTimeout(function() {
-                group_ready[id].call(iframe, loadname, iframe.contentWindow);
+                group_ready[id].call(iframe, name, host);
               });
             }
           }
