@@ -127,25 +127,30 @@
     ++_id;
 
     function script_handler(e) {
-      if (count) { count--; count === 0 && success.call(script, w); }
+      count--;
+      count === 0 &&
+        (e.type == 'load' ? success : failure).call(this, loadname, w);
     }
 
     // direct document insertion
     if (!loadmode) {
-      /* mode 0 */
+      /* mode 0 (default) */
       for (i = 0; length > i; ++i) {
         script = _script.cloneNode(true);
         r.insertBefore(script, r.firstChild);
         if (script.onload === null) {
+          if (length > 1 && 'async' in script) {
+            script.async = false;
+          }
           script.onload = script_handler;
-        } else {
+        } else if (script.onreadystatechange === null) {
           script.onreadystatechange = function(e) {
-            if (script.readyState == 'complete') {
+            if (/complete|loaded/.test(script.readyState)) {
               script_handler(e);
             }
           };
         }
-        script.onerror = failure;
+        script.onerror = script_handler;
         script.src = resource[i];
       }
       return;
@@ -161,7 +166,7 @@
       }
       html = '<script>(function(){var w=window,d=w.document;' + dispatch + '(' + setup + ')([' + html + ']);})();</script>';
     } else {
-      /* mode 2 & mode 4 (default) */
+      /* mode 2 & mode 4 */
       for (i = 0; length > i; ++i) {
         html += '<script src="' + resource[i] + '"></script>';
       }
@@ -257,7 +262,7 @@
       // array of strings
       name = resources[0];
       jsonp = name.match(JSONP);
-      sources.push({ 
+      sources.push({
         loadmode: 0,
         loadname: loadname || (jsonp && jsonp[1]) || name_from_url(name),
         resource: resources,
