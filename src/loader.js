@@ -42,7 +42,18 @@
   WRAPPER =
     '<script>' +
       '(function(){var w=window,d=w.document;})()' +
-    '</script>';
+    '</script>',
+
+  // the async attribute will break these assumptions &
+  // dynamic script insertion will not work as expected
+  //
+  // references browser scripts collection
+  scripts = d.scripts || d.getElementsByTagName('script'),
+  // references currently executing script
+  current = d.currentScript || scripts[scripts.length - 1];
+
+  // check that current is the expected script or unset it
+  /loader\.js$/.test(current.src) || (current == null);
 
   // set default config options
   config.scope || (config.scope = 'modules');
@@ -145,20 +156,25 @@
       /* mode 0 (default) */
       for (i = 0; length > i; ++i) {
         script = _script.cloneNode(true);
-        r.insertBefore(script, r.firstChild);
         if (script.onload === null) {
-          if (length > 1 && 'async' in script) {
-            script.async = false;
-          }
           script.onload = script_handler;
+          script.onerror = script_handler;
+          if (length > 1) script.async = false;
         } else if (script.onreadystatechange === null) {
-          script.onreadystatechange = function(e) {
+          script.attachEvent('onerror', script_handler);
+          script.attachEvent('onreadystatechange', function(e) {
             if (/complete|loaded/.test(script.readyState)) {
               script_handler(e);
             }
-          };
+          });
         }
-        script.onerror = script_handler;
+        if (current) {
+          current.parentNode.insertBefore(script, current);
+        } else {
+          // fallback for when loader.js itself
+          // is loaded with the async attribute
+          r.insertBefore(script, d.head || r.firstChild);
+        }
         script.src = resource[i];
       }
       return;
