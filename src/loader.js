@@ -53,7 +53,7 @@
   current = d.currentScript || scripts[scripts.length - 1];
 
   // check that current is the expected script or unset it
-  /loader\.js$/.test(current.src) || (current == null);
+  (/loader\.js$/).test(current.src) || (current = null);
 
   // set default config options
   config.scope || (config.scope = 'modules');
@@ -120,7 +120,7 @@
       t = d.createEvent ? 'onload' : 'onreadystatechange';
       function notify(e) {
         if (this.readyState && !(/complete|loaded/.test(this.readyState))) return;
-        l && l-- && l === 0 && dispatch();
+        if (l) { l--; l === 0 && dispatch(); }
       }
       if (isNaN(scripts)) {
         w.onload = function() {
