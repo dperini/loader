@@ -226,7 +226,11 @@
     iframe.src = 'javascript:\'' + html + '\'';
 
     // insert iframe in the document, before the head section
-    iframe = r.insertBefore(iframe, d.head || r.firstChild);
+    // webkit needs an extra timeout here to completely avoid
+    // blocking other resources even when fetching from cache
+    w.setTimeout(function() {
+      iframe = r.insertBefore(iframe, d.head || r.firstChild);
+    });
 
     // iframe callback & cleanup
     function iframe_handler(e) {
