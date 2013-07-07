@@ -275,9 +275,7 @@
   // parse parameters and build load sequence
   function load(resources, success, failure) {
 
-    var e, i, l, s, jsonp, name, loadmode, loadname;
-
-    success && (success.group_id = group_id);
+    var e, i, l, s, jsonp, name;
 
     if (typeof resources == 'string') {
       resources = [ resources ];
@@ -288,33 +286,37 @@
       // array of strings
       name = resources[0];
       jsonp = name.match(JSONP);
+      success || (success = FN);
+      success.group_id = group_id;
       sources.push({
         loadmode: 0,
-        loadname: loadname || (jsonp && jsonp[1]) || name_from_url(name),
+        loadname: (jsonp && jsonp[1]) || name_from_url(name),
         resource: resources,
-        success: success || FN,
+        success: success,
         failure: failure || FN
       });
     } else {
+      // array of objects
       for (i = 0, l = 0; s = resources[i]; ++i) {
-        // array of objects
-        name = typeof s.resource == 'string' ?
-          s.resource : s.resource[i];
+        name = typeof s.resource == 'string' ? s.resource : s.resource[i];
         jsonp = name.match(JSONP);
+        s.success || (s.success = FN);
+        s.success.group_id = group_id;
         sources.push({
           loadmode: s.loadmode || 0,
           loadname: s.loadname || (jsonp && jsonp[1]) || name_from_url(name),
           resource: s.resource,
-          success: s.success || FN,
+          success: s.success,
           failure: s.failure || FN
         });
-        s.success.group_id = group_id;
+        // don't wait slow resources
+        // in group success callbacks
         if (s.loadmode != 4) ++l;
       }
     }
 
     // fill loading group info
-    group_ready[group_id] = success;
+    group_ready[group_id] = success || FN;
     group_count[group_id] = l;
     ++group_id;
 
