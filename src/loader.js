@@ -273,33 +273,36 @@
       resources = [ resources ];
     }
 
+    typeof success == 'function' || (success = FN);
+    typeof failure == 'function' || (failure = FN);
+
     // queue resources
     if (typeof resources[0] == 'string') {
       // array of strings
       name = resources[0];
       jsonp = name.match(JSONP);
-      success || (success = FN);
       success.group_id = group_id;
       sources.push({
         loadmode: 0,
         loadname: (jsonp && jsonp[1]) || name_from_url(name),
         resource: resources,
         success: success,
-        failure: failure || FN
+        failure: failure
       });
     } else {
       // array of objects
       for (i = 0, l = 0; s = resources[i]; ++i) {
+        typeof s.success == 'function' || (s.success = FN);
+        typeof s.failure == 'function' || (s.failure = FN);
         name = typeof s.resource == 'string' ? s.resource : s.resource[i];
         jsonp = name.match(JSONP);
-        s.success || (s.success = FN);
         s.success.group_id = group_id;
         sources.push({
           loadmode: s.loadmode || 0,
           loadname: s.loadname || (jsonp && jsonp[1]) || name_from_url(name),
           resource: s.resource,
           success: s.success,
-          failure: s.failure || FN
+          failure: s.failure
         });
         // don't wait slow resources
         // in group success callbacks
@@ -308,7 +311,7 @@
     }
 
     // fill loading group info
-    group_ready[group_id] = success || FN;
+    group_ready[group_id] = success;
     group_count[group_id] = l;
     ++group_id;
 
