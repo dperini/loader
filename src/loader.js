@@ -235,37 +235,25 @@
     // iframe callback & cleanup
     function iframe_handler(e) {
 
-      var id, remove,
-      name = loadname,
+      var id = success.group_id,
       host = iframe.contentWindow;
 
       // keep a reference to the iframe
       _cache.push(iframe);
 
-      if (typeof success == 'function') {
-        // JSONP callback already processed
-        remove = success.call(iframe, name, host);
-      }
-
-      if (!remove && iframe.parentNode) {
-        // remove iframe from main document
+      // only remove iframe from main document
+      // if the callback return a falsy value
+      if (!success.call(iframe, loadname, host)) {
         w.setTimeout(function() {
-          iframe.parentNode.removeChild(iframe);
+          iframe.parentNode && iframe.parentNode.removeChild(iframe);
         });
       }
 
-      if (typeof success == 'function') {
-        id = success.group_id;
-        if (group_count[id]) {
-          --group_count[id];
-          if (group_count[id] === 0) {
-            if (typeof group_ready[id] == 'function') {
-              w.setTimeout(function() {
-                group_ready[id].call(iframe, name, host);
-              });
-            }
-          }
-        }
+      group_count[id]--;
+      if (group_count[id] === 0) {
+        w.setTimeout(function() {
+          group_ready[id].call(iframe, loadname, host);
+        });
       }
 
     }
